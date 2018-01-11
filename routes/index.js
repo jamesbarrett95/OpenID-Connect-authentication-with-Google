@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const bodyParser = require('body-parser')
 
 const users = [{ email: 'up734253@myport.ac.uk', roles: ['user', 'admin'] }]
 
@@ -42,33 +43,46 @@ router.get('/api/user/roles', (req, res) => {
   res.send(user.roles)
 })
 
+// View users who have requested access to the application if they are an admin, otherwise throw a 403
+// ONGOING
 router.get('/api/user/request', (req, res) => {
   const user = getCurrentLoggedIn(req.user.emails[0].value) // Get current user
   if (!isAdmin(user)) res.sendStatus(403)
   const requested = users
     .filter(user => user.requestAccess === true)
     .map(user => user.email)
-  console.log(requested)
   res.send(requested)
 })
 
+// Request access to the application
 router.post('/api/user/request', (req, res) => {
   const user = getCurrentLoggedIn(req.user.emails[0].value) // Get current user
   user.requestAccess = true // User has requested access
   res.sendStatus(202)
 })
 
-router.post('/api/user/approve', (req, res) => {
+// ONGOING
+router.post('/api/user/approve', bodyParser.text(), (req, res) => {
   const user = getCurrentLoggedIn(req.user.emails[0].value) // Get current user
   if (!isAdmin(user)) res.sendStatus(403)
+  for(let i = 0; i < users.length; i++ ) {
+    if(req.body == users[i].email) {
+      users[i].roles.push('user')
+      users[i].requestedAccess = false
+      res.send(users[i])
+      return
+    }
+  }
 })
 
+// View users if you are an admin, otherwise throw a 403
 router.get('/api/users', (req, res) => {
   const user = getCurrentLoggedIn(req.user.emails[0].value) // Get current user
   if (!isAdmin(user)) res.sendStatus(403)
   res.send(users)
 })
 
+// TODO
 router.delete('/api/user/:email')
 
 module.exports = router
