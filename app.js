@@ -12,10 +12,6 @@ const app = express()
 // Serve up HTML and CSS from static folder
 app.use(express.static('static'))
 
-// Takes the raw requests and turns them into usable properties on req.body
-app.use(bodyParser.json())
-app.use(bodyParser.urlencoded({ extended: true }))
-
 // Google Client ID
 app.use(GoogleAuth(process.env.GOOGLE_CLIENT_ID))
 
